@@ -14,6 +14,7 @@ import os
 import falcon
 import falcon.asgi
 
+
 def create_file(file_path):
     if not os.path.exists(file_path):
         f = open(file_path, 'w+')
@@ -30,7 +31,7 @@ class BackendApp:
         self.session_maker = None
         self.celery = celery_controller
 
-    def register_resources(self, app: falcon.asgi.App)-> None:
+    def register_resources(self, app: falcon.asgi.App) -> None:
         app.add_route('/health', HealthResource())
         flights_service = FlightsService(FlightGetSerivce(), FlightValidatorService(), FlightsRepository())
         app.add_route('/api/v1/flights', FlightsResource(flights_service))
@@ -41,27 +42,24 @@ class BackendApp:
     def prepare_db(self, config):
         create_file(config.TEST_DB_PATH)
 
-
     def create_app(self, config=None) -> falcon.asgi.App:
-
         self.config = config
-        
-        self.falcon_app = falcon.asgi.App()
 
+        self.falcon_app = falcon.asgi.App()
 
         self.prepare_db(config)
 
         self.session_maker = get_session_maker(self.config)
         self.falcon_app.add_middleware(Crossdomain())
         self.falcon_app.add_middleware(SQLAlchemySessionManager(self.session_maker))
-        
-        self.migrate_db(self.session_maker())
 
+        self.migrate_db(self.session_maker())
 
         self.celery.make_celery_app(config, self.session_maker)
 
         self.register_resources(self.falcon_app)
 
         return self.falcon_app
+
 
 backend_app = BackendApp()
