@@ -14,9 +14,16 @@ class FlightRequestData(BaseJsonObject):
         self.end_date = end_date
         
 
-class FlightCheckData(BaseJsonObject):
+class FlightValidationData(BaseJsonObject):
     def __init__(self, booking_token, pnum, currency, adults) -> None:
         self.booking_token = booking_token
         self.pnum = pnum
         self.currency = currency
         self.adults = adults
+
+class CheapestFlightResponse(BaseJsonObject):
+
+    def __init__(self, cheapest_flight, all_flights) -> None:
+        self.cheapest_flight = cheapest_flight
+        self.all_flights = all_flights
+

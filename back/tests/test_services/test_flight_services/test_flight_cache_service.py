@@ -10,10 +10,10 @@ class TestFlightCacheService(testing.TestCase):
         current_date = datetime.date.today() 
         end_date = current_date + datetime.timedelta(1)
 
-        date_format = '%d/%m/%Y'
+        self.date_format = '%d/%m/%Y'
 
-        f_current_date = current_date.strftime(date_format)
-        f_end_date = end_date.strftime(date_format)
+        f_current_date = current_date.strftime(self.date_format)
+        f_end_date = end_date.strftime(self.date_format)
         request_data = FlightRequestData('ALA', 'TSE',f_current_date, f_end_date)
         self.request_data = request_data
 
@@ -29,10 +29,12 @@ class TestFlightCacheService(testing.TestCase):
             d_time = datetime.datetime.fromtimestamp(flight['dTimeUTC']).date()
             a_time = datetime.datetime.fromtimestamp(flight['aTimeUTC']).date()
 
-            assert current_date <= d_time <= end_date
+            start_date = datetime.datetime.strptime(self.request_data.start_date, self.date_format).date()
+            end_date = datetime.datetime.strptime(self.request_data.end_date, self.date_format).date()
+            assert start_date <= d_time <= end_date 
 
     def test_get_cheapest_flight(self):
-        cheapest_flight = self.flight_cache_service.get_cheapest_flight(self.request_data)
+        cheapest_flight = self.flight_cache_service.get_cheapest_flight(self.request_data).cheapest_flight
         assert cheapest_flight is not None
         response = self.flight_cache_service.get_flights(self.request_data)
 
