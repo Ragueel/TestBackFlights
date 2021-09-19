@@ -1,6 +1,6 @@
 from falcon import testing
 import datetime
-
+from src.repository.flights_repository import FlightsRepository
 from src.services.flight_services.flight_get import FlightGetSerivce, FlightRequestData
 from src.services.flight_services.flights_service import FlightsService
 from src.services.flight_services.flight_validator import FlightValidatorService
@@ -10,7 +10,8 @@ class TestFlightService(testing.TestCase):
     def setUp(self):
         self.flight_get_service = FlightGetSerivce()
         self.flight_validator_service = FlightValidatorService()
-        self.flight_service = FlightsService(self.flight_get_service, self.flight_validator_service)
+        self.flight_repository = FlightsRepository()
+        self.flight_service = FlightsService(self.flight_get_service, self.flight_validator_service, self.flight_repository)
 
         current_date = datetime.date.today() 
         end_date = current_date + datetime.timedelta(1)

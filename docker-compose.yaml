@@ -1,0 +1,30 @@
+version: '3.8'
+
+services: 
+    backend:
+        build: ./back
+        image: backend
+        container_name: backend
+        ports: 
+            - 8000:8000
+        volumes:
+            - ./back:/usr/src/app
+        command: uvicorn --host 0.0.0.0 --port 8000 run:app
+        environment: 
+            - .env
+        depends_on: 
+            - redis
+
+    celery:
+        image: backend
+        volumes:
+            - ./back:/usr/src/app
+        command: python celery_start.py
+        environment: 
+            - .env
+        depends_on: 
+            - redis
+            - backend
+
+    redis:
+        image: redis:6-alpine

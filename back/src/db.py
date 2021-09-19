@@ -6,5 +6,5 @@ from .config import BaseConfig
 def get_session_maker(config: BaseConfig):
     engine = create_engine(config.DB_CONNECTION)
     session_factory = sessionmaker(engine)
-    Session = scoped_session(session_factory)
-    return Session
+    session = scoped_session(session_factory)
+    return session

@@ -11,6 +11,9 @@ class Flight(Base):
     flight_to = Column(String)
     price = Column(Numeric, default=0.0)
 
+    def to_json(self):
+        return {'id': self.id, 'flight_from': self.flight_from, 'flight_to': self.flight_to, 'price': float(self.price)}
+
 def create_all(engine):
     Base.metadata.bind = engine
     Base.metadata.drop_all()
