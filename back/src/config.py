@@ -9,6 +9,8 @@ class BaseConfig:
     CELERY_BROKER=os.environ.get('CELERY_BROKER', 'redis://localhost:6379/0') 
     CELERY_BACKEND=os.environ.get('CELERY_BACKEND', 'redis://localhost:6379/0') 
     SKY_API_PARTNER=os.environ.get('SKY_API_PARTNER', 'ragueelnomad')
+    DB_CONNECTION = os.environ.get('DB_CONNECTION', 'sqlite:///test.sqlite')
+    CONFIG_TYPE='DEV'
 
     def __init__(self):
         self.storage_path = pathlib.Path(

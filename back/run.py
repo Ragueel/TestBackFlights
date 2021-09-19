@@ -1,4 +1,4 @@
-from src.app import create_app
-
-app = create_app()
+from src.app import backend_app
+from src.config import BaseConfig
+app = backend_app.create_app(BaseConfig())
     

@@ -39,8 +39,10 @@ class FlightsService(object):
 
         while validated_flight_data['flights_invalid']:
             all_flights['data']= all_flights['data'].remove(cheapest_flight)
+
             if len(all_flights['data']) == 0:
                 raise Exception('No available flights were found')
+                
             cheapest_flight = self.flight_get_service.get_flight_with_min_price(all_flights['data'])
             flight_validation_data = FlightValidationData(cheapest_flight['booking_token'],1,'EUR',1)
             validated_flight_data = self.flight_validator_service.validate_until_checked(flight_validation_data)
