@@ -3,8 +3,10 @@
     <v-app-bar
       :clipped-left="clipped"
       fixed
+      elevation="0"
       app
     >
+    <h1>Test site</h1>
     </v-app-bar>
     <v-main>
       <v-container>
