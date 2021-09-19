@@ -25,6 +25,13 @@ services:
         depends_on: 
             - redis
             - backend
-
+    front:
+        build: ./front
+        image: front
+        container_name: front
+        ports: 
+            - 5000:5000
+        environment: 
+            - .env
     redis:
         image: redis:6-alpine

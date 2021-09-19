@@ -2,15 +2,17 @@ from src.services.flight_services.flights_service import FlightsService
 from src.services.flight_services.flight_get import FlightGetSerivce
 from src.services.flight_services.flight_validator import FlightValidatorService
 from src.repository.flights_repository import FlightsRepository
-import falcon.asgi
 from .config import BaseConfig
 from .resources.health import HealthResource
 from .db import get_session_maker
 from .models.all_models import create_all
 from .celery import celery_controller
 from .middleware.session_manager_middleware import SQLAlchemySessionManager
+from .middleware.cors_middleware import Crossdomain
 from .resources.flights_resource import FlightsResource
 import os
+import falcon
+import falcon.asgi
 
 def create_file(file_path):
     if not os.path.exists(file_path):
@@ -46,9 +48,11 @@ class BackendApp:
         
         self.falcon_app = falcon.asgi.App()
 
+
         self.prepare_db(config)
 
         self.session_maker = get_session_maker(self.config)
+        self.falcon_app.add_middleware(Crossdomain())
         self.falcon_app.add_middleware(SQLAlchemySessionManager(self.session_maker))
         
         self.migrate_db(self.session_maker())

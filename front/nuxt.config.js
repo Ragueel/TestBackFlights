@@ -36,7 +36,7 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
     // https://go.nuxtjs.dev/eslint
-    '@nuxtjs/eslint-module',
+    // '@nuxtjs/eslint-module',
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify'
   ],
@@ -47,8 +47,24 @@ export default {
     '@nuxtjs/axios'
   ],
 
+  axios: {
+    proxy: true
+  },
+  
+  axios: {
+    // proxy: true,
+    proxyHeaders: false,
+    credentials: false,
+    baseURL: 'http://localhost:8000',
+  },
+  // proxy: {
+  //   '/api/v1/': process.env.API_URL || 'http://0.0.0.0:8000/'
+  // },
+  proxy: {
+    '/api/': { target: 'http://backend:8000/', pathRewrite: {'^/api/': '/api/'}, changeOrigin: true }
+  },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  // axios: {},
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
