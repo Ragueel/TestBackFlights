@@ -1,6 +1,7 @@
 import falcon.asgi
 from .config import BaseConfig
 from .resources.health import HealthResource
+from .celery import celery_app
 
 def register_resources(app: falcon.asgi.App)-> None:
     app.add_route('/health', HealthResource())

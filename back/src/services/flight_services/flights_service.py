@@ -1,75 +1,21 @@
 from typing import List
-from src.models.request_data.flights import FlightValidationData, FlightRequestData, CheapestFlightResponse
-from time import sleep
+from src.models.request_data.flights import FlightValidationData, FlightRequestData
+from celery import shared_task
+from celery.utils.log import get_task_logger
+from .flight_validator import FlightValidatorService
+from .flight_get import FlightGetSerivce
+
 import requests
+import json
 
-class API_URLS:
-    SKY_PICKER = 'https://api.skypicker.com'
+logger = get_task_logger(__name__)
 
-class FlightValidatorService(object):
-
-    def get_flight_check(self, flight_check_data: FlightValidationData):
-        end_point = '/'.join([API_URLS.SKY_PICKER, 'api/v0.1/check_flights'])
-        params = {
-            'booking_token' : flight_check_data.booking_token,
-            'pnum': flight_check_data.pnum,
-            'currency': flight_check_data.currency,
-            'adults': flight_check_data.adults,
-            'children': 0,
-            'infants': 0,
-            'bnum': 0
-        }
-
-        response = requests.get(end_point, params=params)
-
-        if response.status_code != 200:
-            raise Exception('Exception while validating: {}'.format(response.json()))
-
-        return response.json()
-
-    def validate_until_checked(self, flight_check_data: FlightValidationData):
-        flight_check = self.get_flight_check(flight_check_data)
-
-        while not flight_check['flights_checked'] or flight_check['flights_invalid']:
-            sleep(20)
-            flight_check = self.get_flight_check(flight_check_data)
-
-        return flight_check
-
-
-class FlightGetSerivce(object):
-
-    def __init__(self) -> None:
-        super().__init__()
-
-    def get_flights(self, flight_request_data: FlightRequestData)->dict:
-        end_point = '/'.join([API_URLS.SKY_PICKER, 'flights'])
-        params = {
-            'fly_from': flight_request_data.flight_from,
-            'fly_to': flight_request_data.flight_to,
-            'date_from': flight_request_data.start_date,
-            'date_to': flight_request_data.end_date,
-            'adults': 1,
-            'partner': 'ragueelnomad'
-        }
-        response = requests.get(end_point, params=params)
-
-
-        if response.status_code != 200:
-            raise Exception('Exception while getting flights: {}'.format(response.json()))
-
-        return response.json()
-
-    def get_cheapest_flight(self, flight_request_data: FlightRequestData)->CheapestFlightResponse:
-        flights = self.get_flights(flight_request_data)
-
-        data = flights['data']
-
-        cheapest_flight = min(data, key=lambda x:x['price'])
-
-        return CheapestFlightResponse(cheapest_flight, flights)
-
-
+@shared_task(bind=True,name='find_cheapest_flight_schedule')
+def find_cheapest_flight_schedule(self, flight_request_data):
+    flight_request_data = json.loads(flight_request_data)
+    flight_service = FlightsService(FlightGetSerivce(), FlightValidatorService())
+    cheapest_flight = flight_service.get_cheapest_checked_flight(FlightRequestData(**flight_request_data))        
+    return cheapest_flight
 
 class FlightsService(object):
 
@@ -78,7 +24,27 @@ class FlightsService(object):
         self.flight_validator_service = flight_validator_service
 
     def collect_data_from_server(self, flight_requests: list) -> None:
-        
-        pass
+        for flight in flight_requests:
+            find_cheapest_flight_schedule.delay(flight.to_json())
+
+
+    def get_cheapest_checked_flight(self, flight_request_data: FlightRequestData)->dict:
+        flight_data = self.flight_get_service.get_cheapest_flight(flight_request_data)
+
+        all_flights = flight_data.all_flights
+        cheapest_flight = flight_data.cheapest_flight
+
+        flight_validation_data = FlightValidationData(cheapest_flight['booking_token'],1,'EUR',1)
+        validated_flight_data = self.flight_validator_service.validate_until_checked(flight_validation_data)
+
+        while validated_flight_data['flights_invalid']:
+            all_flights['data']= all_flights['data'].remove(cheapest_flight)
+            if len(all_flights['data']) == 0:
+                raise Exception('No available flights were found')
+            cheapest_flight = self.flight_get_service.get_flight_with_min_price(all_flights['data'])
+            flight_validation_data = FlightValidationData(cheapest_flight['booking_token'],1,'EUR',1)
+            validated_flight_data = self.flight_validator_service.validate_until_checked(flight_validation_data)
+
+        return validated_flight_data
 
         

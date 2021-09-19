@@ -1,6 +1,6 @@
 from falcon import testing
 import datetime
-from src.services.flight_services.flights_service import FlightGetSerivce, FlightRequestData
+from src.services.flight_services.flight_get import FlightGetSerivce, FlightRequestData
 
 
 class TestFlightCacheService(testing.TestCase):

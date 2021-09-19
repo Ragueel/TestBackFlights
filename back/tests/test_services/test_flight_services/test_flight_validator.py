@@ -1,6 +1,8 @@
 from falcon import testing
 import datetime
-from src.services.flight_services.flights_service import FlightGetSerivce, FlightRequestData, FlightValidatorService, FlightValidationData
+
+from src.services.flight_services.flight_get import FlightGetSerivce, FlightRequestData
+from src.services.flight_services.flight_validator import FlightValidatorService, FlightValidationData
 
 class TestFlightValidatorService(testing.TestCase):
 
