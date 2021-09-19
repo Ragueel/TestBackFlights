@@ -5,4 +5,4 @@ import falcon
 class HealthResource(BaseResource):
 
     async def on_get(self, req,resp):
-        return self.make_success(resp, BaseResponse(falcon.HTTP_200, 'Healthy'))
+        return self.ok(resp, BaseResponse(falcon.HTTP_200, 'Healthy'))
