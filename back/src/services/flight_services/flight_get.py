@@ -1,6 +1,7 @@
 
 from src.models.request_data.flights import FlightValidationData, FlightRequestData, CheapestFlightResponse
 from . import API_URLS
+from src.config import BaseConfig
 import requests
 
 class FlightGetSerivce(object):
@@ -16,7 +17,7 @@ class FlightGetSerivce(object):
             'date_from': flight_request_data.start_date,
             'date_to': flight_request_data.end_date,
             'adults': 1,
-            'partner': 'ragueelnomad'
+            'partner': BaseConfig.SKY_API_PARTNER
         }
         response = requests.get(end_point, params=params)
 
